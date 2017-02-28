@@ -1,3 +1,7 @@
+.invisible{
+    visibility:hidden;
+}
+
 .wizard-item {
     display: none;
 }
@@ -22,6 +26,14 @@
             color: #FFA500; /* Orange*/
         }
 
+    .breadcrumb .breadcrumb-item.unclickable {
+        opacity: 0.5;
+    }
+
+        .breadcrumb .breadcrumb-item.unclickable:hover {
+            color: #444444;
+        }
+
     .breadcrumb .navigate-step {
         padding: 0px 5px;
     }
@@ -40,7 +52,6 @@
                 font: 14px FontAwesome;
                 margin: 0px 4px;
             }
-
 
         .breadcrumb .navigate-step.prev-step {
             float: left;
