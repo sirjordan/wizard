@@ -1,9 +1,10 @@
 <h2>Setup:<h2>
-1. jQuery > 1.12 / tested on /
-2. Object to make steps must have title='<step title>' to dipslay in the breadcrumb or naming will be 1,2,3
+<p>1. jQuery > 1.12 / tested on /</p>
+<p>2. Object to make steps must have title='<step title>' to dipslay in the breadcrumb or naming will be 1,2,3</p>
 
-Usage:
+<h2>Usage:</h2>
 
+<code>
 wizard
     .init('.my-step')
     .stepChanged(function (args) {
@@ -11,3 +12,4 @@ wizard
     })
     .selectedIndex(0)
     .allowJumpStatements(true);
+    </code>
