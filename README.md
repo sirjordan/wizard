@@ -6,10 +6,10 @@
 
 <code>
 wizard
-    .init('.my-step')
+    .init('.my-step')< /br>
     .stepChanged(function (args) {
             console.log('changed to ' + args.selectedIndex);
     })
     .selectedIndex(0)
     .allowJumpStatements(true);
-    </code>
+</code>
