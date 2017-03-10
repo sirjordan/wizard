@@ -13,7 +13,8 @@ wizard
             console.log('changed to ' + args.selectedIndex);
     })
     .selectedIndex(0)
-    .allowJumpStatements(true);
+    .allowJumpStatements(true)
+    .animation(true);
 */
 
 var wizard = function ($) {
@@ -24,6 +25,7 @@ var wizard = function ($) {
     var _breadcrumbItemClass = 'breadcrumb-item';
     var _unclickableClass = 'unclickable';
     var _invisibleClass = 'invisible';
+    var _animatedClass = 'animated';
 
     var _$breadcrumb = $();
     var _$stepItems = $();
@@ -34,6 +36,7 @@ var wizard = function ($) {
     var _maxReachedIndex;
     var _stepChangedCallback;
     var _allowJumpStatements;
+    var _animationOn;
 
     var stepChanged = function (callback) {
         _stepChangedCallback = callback;
@@ -118,6 +121,14 @@ var wizard = function ($) {
         return this;
     }
 
+    var set_animation = function (on) {
+        if (on === true || on === 'true') {
+            _animationOn = true;
+        } else {
+            _animationOn = false;
+        }
+    }
+
     function reset() {
         _$stepItems = $();
         _$breadcrumb = $('<div>').addClass(_breadcrumbClass);
@@ -136,6 +147,7 @@ var wizard = function ($) {
 
         _stepChangedCallback = function () { };
         _allowJumpStatements = false;
+        _animationOn = false;
     }
 
     function after_init() {
@@ -143,11 +155,15 @@ var wizard = function ($) {
     }
 
     function on_Prev_click() {
-        switchStep(_selectedIndex - 1);
+        slide(_selectedIndex, _selectedIndex - 1, function () {
+            switchStep(_selectedIndex - 1);
+        });
     }
 
     function on_Next_click() {
-        switchStep(_selectedIndex + 1)
+        slide(_selectedIndex, _selectedIndex + 1, function () {
+            switchStep(_selectedIndex + 1);
+        });
     }
 
     function on_BreadcrumbItem_click(e) {
@@ -166,7 +182,6 @@ var wizard = function ($) {
                 console.log('if not allowed hint the user to click the \'next\' btn');
             }
         }
-
     }
 
     function selectStep() {
@@ -178,10 +193,7 @@ var wizard = function ($) {
         $bredcrumbItems.removeClass(_selectedClass);
         $breadcrumbItem.addClass(_selectedClass);
 
-        var $stepItem = _$stepItems.filter(function () {
-            // gets the window/steps that has attr as selected index
-            return parseInt($(this).attr(_dataStepAttr)) === _selectedIndex;
-        });
+        var $stepItem = get_currentStepItem();
         _$stepItems.removeClass(_selectedClass);
         $stepItem.addClass(_selectedClass);
 
@@ -229,6 +241,46 @@ var wizard = function ($) {
         return $items;
     }
 
+    function get_currentStepItem() {
+        var $stepItem = _$stepItems.filter(function () {
+            // gets the window/steps that has attr as selected index
+            return parseInt($(this).attr(_dataStepAttr)) === _selectedIndex;
+        })
+
+        return $stepItem;
+    }
+
+    function slide(positionFrom, positionTo, afterSlideCallback) {
+
+        _$breadcrumb.removeClass(_animatedClass);
+        _$stepItems.removeClass(_animatedClass);
+
+        if (_animationOn) {
+            _$breadcrumb.addClass(_animatedClass);
+            _$stepItems.addClass(_animatedClass);
+
+            var sign;
+            var offset = positionFrom - positionTo;
+            if (offset < 0) {
+                sign = '-=';
+            } else {
+                sign = '+=';
+            }
+
+            var $current = get_currentStepItem();
+            var width = $current.width();
+
+            var animation = {
+                'left': sign + width
+            };
+
+            $current.animate(animation, 250, function () {
+                $current.css('left', 0);
+                afterSlideCallback()
+            });
+        }
+    }
+
     return {
         // Construct the wizard
         init: init,
@@ -236,6 +288,8 @@ var wizard = function ($) {
         selectedIndex: switchStep,
         stepChanged: stepChanged,
         // allow jump over wizard steps
-        allowJumpStatements: set_allowJumpStatements
+        allowJumpStatements: set_allowJumpStatements,
+        // turn slide animation on/off
+        animations: set_animation
     };
 }(jQuery);
