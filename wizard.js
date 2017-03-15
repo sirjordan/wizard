@@ -3,7 +3,7 @@
 
 Setup:
 1. jQuery > 1.12 / tested on /
-2. Object to make steps must have title='<step title>' to dipslay in the breadcrumb or naming will be 1,2,3
+2. Object to make steps must have title='my step title' to dipslay in the breadcrumb or naming will be 1,2,3
 
 Usage:
 
@@ -14,7 +14,10 @@ wizard
     })
     .selectedIndex(0)
     .allowJumpStatements(true)
-    .animation(true);
+    .animation(true)
+    .finish(function () {
+        console.log('finish callback called');
+    });
 */
 
 var wizard = function ($) {
@@ -31,15 +34,22 @@ var wizard = function ($) {
     var _$stepItems = $();
     var _$navPrev = $();
     var _$navNext = $();
+    var _$navFinish = $();
 
     var _selectedIndex;
     var _maxReachedIndex;
     var _stepChangedCallback;
     var _allowJumpStatements;
     var _animationOn;
+    var _finishCallback;
 
     var stepChanged = function (callback) {
         _stepChangedCallback = callback;
+        return this;
+    }
+
+    var finishClick = function (callback) {
+        _finishCallback = callback;
         return this;
     }
 
@@ -89,7 +99,7 @@ var wizard = function ($) {
         // prev / next buttons
         _$breadcrumb.append(_$navPrev);
         _$breadcrumb.append(_$navNext);
-
+        _$breadcrumb.append(_$navFinish);
         _$breadcrumb.insertAfter($stepItems.last());
 
         after_init();
@@ -127,6 +137,8 @@ var wizard = function ($) {
         } else {
             _animationOn = false;
         }
+
+        return this;
     }
 
     function reset() {
@@ -145,7 +157,13 @@ var wizard = function ($) {
             .text('next')
             .click(on_Next_click);
 
+        _$navFinish = $('<span>')
+            .addClass('navigate-step finish-step')
+            .text('finish')
+            .click(on_Finish_Click);
+
         _stepChangedCallback = function () { };
+        _finishCallback = function () { };
         _allowJumpStatements = false;
         _animationOn = false;
     }
@@ -157,13 +175,19 @@ var wizard = function ($) {
     function on_Prev_click() {
         slide(_selectedIndex, _selectedIndex - 1, function () {
             switchStep(_selectedIndex - 1);
+            riseStepChanged();
         });
     }
 
     function on_Next_click() {
         slide(_selectedIndex, _selectedIndex + 1, function () {
             switchStep(_selectedIndex + 1);
+            riseStepChanged();
         });
+    }
+
+    function on_Finish_Click() {
+        _finishCallback();
     }
 
     function on_BreadcrumbItem_click(e) {
@@ -176,6 +200,7 @@ var wizard = function ($) {
             if (_allowJumpStatements || dataStep <= _maxReachedIndex) {
                 _selectedIndex = dataStep;
                 selectStep();
+                riseStepChanged();
             } else {
                 // if not allowed hint the user to click the 'next' btn
                 // todo:
@@ -197,13 +222,15 @@ var wizard = function ($) {
         _$stepItems.removeClass(_selectedClass);
         $stepItem.addClass(_selectedClass);
 
-        // fire step change callback
+        markJumpStepItems();
+        removeNavigationItems();
+    }
+
+    // fire step change callback
+    function riseStepChanged() {
         _stepChangedCallback({
             selectedIndex: _selectedIndex
         });
-
-        markJumpStepItems();
-        removeNavigationItems();
     }
 
     // mark those that are higher than current step as unclickable
@@ -222,6 +249,7 @@ var wizard = function ($) {
     function removeNavigationItems() {
         _$navPrev.removeClass(_invisibleClass);
         _$navNext.removeClass(_invisibleClass);
+        _$navFinish.addClass(_invisibleClass);
 
         if (_selectedIndex == 0) {
             // no back btn
@@ -229,6 +257,7 @@ var wizard = function ($) {
         } else if (_selectedIndex == _$stepItems.length - 1) {
             // no next btn
             _$navNext.addClass(_invisibleClass);
+            _$navFinish.removeClass(_invisibleClass);
         }
     }
 
@@ -286,10 +315,13 @@ var wizard = function ($) {
         init: init,
         // Set the wizard step
         selectedIndex: switchStep,
+        // rised when the the step is changed
         stepChanged: stepChanged,
         // allow jump over wizard steps
         allowJumpStatements: set_allowJumpStatements,
         // turn slide animation on/off
-        animations: set_animation
+        animations: set_animation,
+        // rised after the last (finish) step is clicked
+        finish: finishClick,
     };
 }(jQuery);
