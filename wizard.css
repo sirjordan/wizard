@@ -70,6 +70,11 @@
             float: right;
         }
 
+        .breadcrumb .navigate-step.finish-step {  
+            float: right !important;
+            margin-right:-40px !important;
+        }
+
             .breadcrumb .navigate-step.next-step:after {
                 content: '\f0da'; /* next icon */
                 font: 15px FontAwesome;
