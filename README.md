@@ -12,5 +12,8 @@ wizard
     })
     .selectedIndex(0)
     .allowJumpStatements(true)
-    .animation(true);
+    .animation(true)
+    .finish(function () {
+        console.log('finish callback called');
+    });
 ```
