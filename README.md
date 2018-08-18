@@ -19,6 +19,7 @@ wizard
 ```
 
 <h3>Validation:</h3>
+
 ```javaScript
 wizard
     .init('.wizard-page')
