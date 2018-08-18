@@ -42,4 +42,4 @@ wizard
         // Page validation and other stuff
         return true;
     }
-```
+    ```
