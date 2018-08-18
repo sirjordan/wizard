@@ -17,3 +17,30 @@ wizard
         console.log('finish callback called');
     });
 ```
+
+<h3>Validation:</h3>
+```javaScript
+wizard
+    .init('.wizard-page')
+    .stepChanged(function (args) {
+        console.log('changed to ' + args.selectedIndex);
+    })
+    .beforeStepChanged(function (args){
+        // args.item is the current page item
+        if(!validate(args.item)){
+            args.cancel = true;
+        }
+    })
+    .selectedIndex(0)
+    .allowJumpStatements(false)
+    .animations(true)
+    .finish(function () {
+        console.log('finish callback called');
+    });
+
+    function validate(page) {
+        // Page validation and other stuff
+        return true;
+    }
+```
+
