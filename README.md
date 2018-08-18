@@ -4,9 +4,27 @@
 
 <h3>Usage:</h3>
 
+```html
+<form action="Tour_registration/Register" method="post">
+    <div class="wizard-page" title="Traveler Information">
+        <p>Your Name:</p>
+        <input type="text" />
+    </div>
+    <div class="wizard-page" title="Flight Information">
+        <p>Please select flight number:</p>
+        <select name="flight" id="">
+            <option value="123">123</option>
+        </select>
+    </div>
+    <div class="wizard-page" title="Payment Options">
+        <p>Complete your registration</p>
+    </div>
+</form>
+```
+
 ```javaScript
 wizard
-    .init('.my-step')
+    .init('.wizard-page')
     .stepChanged(function (args) {
             console.log('changed to ' + args.selectedIndex);
     })
