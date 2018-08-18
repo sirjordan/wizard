@@ -14,7 +14,7 @@ wizard
     })
     .selectedIndex(0)
     .allowJumpStatements(true)
-    .animations(true)
+    .animation(true)
     .finish(function () {
         console.log('finish callback called');
     });
@@ -42,6 +42,7 @@ var wizard = function ($) {
     var _allowJumpStatements;
     var _animationOn;
     var _finishCallback;
+    var _beforeStepChangedCallback;
 
     var stepChanged = function (callback) {
         _stepChangedCallback = callback;
@@ -50,6 +51,11 @@ var wizard = function ($) {
 
     var finishClick = function (callback) {
         _finishCallback = callback;
+        return this;
+    }
+
+    var beforeStepChanged = function (callback) {
+        _beforeStepChangedCallback = callback;
         return this;
     }
 
@@ -173,21 +179,27 @@ var wizard = function ($) {
     }
 
     function on_Prev_click() {
-        slide(_selectedIndex, _selectedIndex - 1, function () {
-            switchStep(_selectedIndex - 1);
-            riseStepChanged();
-        });
+        if (continueStep()) {
+            slide(_selectedIndex, _selectedIndex - 1, function () {
+                switchStep(_selectedIndex - 1);
+                riseStepChanged();
+            });
+        }
     }
 
     function on_Next_click() {
-        slide(_selectedIndex, _selectedIndex + 1, function () {
-            switchStep(_selectedIndex + 1);
-            riseStepChanged();
-        });
+        if (continueStep()) {
+            slide(_selectedIndex, _selectedIndex + 1, function () {
+                switchStep(_selectedIndex + 1);
+                riseStepChanged();
+            });
+        }
     }
 
     function on_Finish_Click() {
-        _finishCallback();
+        if (continueStep()) {
+            _finishCallback();
+        }
     }
 
     function on_BreadcrumbItem_click(e) {
@@ -207,6 +219,24 @@ var wizard = function ($) {
                 console.log('if not allowed hint the user to click the \'next\' btn');
             }
         }
+    }
+
+    function getCurrentPage() {
+        return _$stepItems[_selectedIndex];
+    }
+
+    function continueStep() {
+        var beforeChangesArgs = {
+            item: getCurrentPage(),
+            cancel: false
+        };
+
+        _beforeStepChangedCallback(beforeChangesArgs);
+        if (beforeChangesArgs.cancel) {
+            return false;
+        }
+
+        return true;
     }
 
     function selectStep() {
@@ -323,5 +353,8 @@ var wizard = function ($) {
         animations: set_animation,
         // rised after the last (finish) step is clicked
         finish: finishClick,
+        // Validation, cancelation etc. 
+        // Rised before the changed event
+        beforeStepChanged: beforeStepChanged,
     };
 }(jQuery);
